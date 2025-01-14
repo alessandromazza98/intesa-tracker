@@ -1,17 +1,24 @@
 import { Card } from "@tremor/react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BitcoinPrice, BitcoinTransaction } from "../types";
+import { FC } from "react";
 
 interface ChartProps {
   priceData: BitcoinPrice[];
   transactions: BitcoinTransaction[];
 }
 
-const CustomDot = (props: any) => {
-  const { cx, cy, payload } = props;
-  
-  if (!payload.isPurchase) {
-    return <circle cx={cx} cy={cy} r={0} />;
+interface DotProps {
+  cx?: number;
+  cy?: number;
+  payload?: {
+    isPurchase: boolean;
+  };
+}
+
+const CustomDot: FC<DotProps> = ({ cx, cy, payload }) => {
+  if (!cx || !cy || !payload?.isPurchase) {
+    return <></>;
   }
 
   return (
@@ -98,7 +105,7 @@ export function Chart({ priceData, transactions }: ChartProps) {
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorPrice)"
-              dot={CustomDot}
+              dot={<CustomDot />}
             />
           </AreaChart>
         </ResponsiveContainer>
