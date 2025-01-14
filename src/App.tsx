@@ -92,22 +92,24 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col">
-      <div className="w-full max-w-6xl mx-auto px-4 py-4 flex-grow space-y-4">
+      <div className="w-full max-w-6xl mx-auto px-4 pt-8 flex-grow space-y-4">
         <Header holdings={holdings} />
         <Chart priceData={priceData} transactions={mockTransactions} />
         <TransactionTable transactions={mockTransactions} />
       </div>
-      <footer className="text-center py-2 text-blue-300 text-sm">
-        Made with ❤️ by{" "}
-        <a 
-          href="https://x.com/crypto_ita2" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-blue-400 hover:text-blue-300 transition-colors"
-        >
-          Alessandro Mazza
-        </a>
-      </footer>
+      <div className="flex-1 flex items-center justify-center">
+        <footer className="text-center py-4 text-blue-300 text-base">
+          Made with ❤️ by{" "}
+          <a 
+            href="https://x.com/crypto_ita2" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            Alessandro Mazza
+          </a>
+        </footer>
+      </div>
     </div>
   );
 }

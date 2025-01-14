@@ -16,11 +16,17 @@ export function Chart({ priceData, transactions }: ChartProps) {
     ),
   }));
 
+  // Function to determine interval based on screen width
+  const getResponsiveInterval = () => {
+    if (typeof window === 'undefined') return 15;
+    return window.innerWidth < 768 ? 15 : 7; // 15 days for mobile (about 2 per month), 7 days for desktop
+  };
+
   return (
     <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50">
       <div className="h-[300px] md:h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ left: 0, right: 0, top: 20, bottom: 0 }}>
+          <AreaChart data={data} margin={{ left: 10, right: 10, top: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.8} />
@@ -42,10 +48,11 @@ export function Chart({ priceData, transactions }: ChartProps) {
               }}
               stroke="#94a3b8"
               fontSize={12}
-              interval="preserveStartEnd"
+              interval={getResponsiveInterval()}
               tickMargin={10}
               axisLine={{ stroke: '#334155' }}
               tickLine={{ stroke: '#334155' }}
+              padding={{ left: 10, right: 10 }}
             />
             <YAxis
               tickFormatter={(value) => `$${Math.round(value / 1000)}k`}
@@ -54,6 +61,7 @@ export function Chart({ priceData, transactions }: ChartProps) {
               tickMargin={10}
               axisLine={{ stroke: '#334155' }}
               tickLine={{ stroke: '#334155' }}
+              width={60}
             />
             <Tooltip
               content={({ active, payload }) => {
