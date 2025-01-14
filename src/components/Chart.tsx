@@ -1,31 +1,41 @@
 import { Card } from "@tremor/react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BitcoinPrice, BitcoinTransaction } from "../types";
+import { ReactElement } from "react";
 
 interface ChartProps {
   priceData: BitcoinPrice[];
   transactions: BitcoinTransaction[];
 }
 
-const renderDot = (props: any) => {
+type DotProps = {
+  cx: number;
+  cy: number;
+  value: number;
+  payload: {
+    timestamp: number;
+    price: number;
+    isPurchase: boolean;
+  };
+};
+
+const CustomDot = (props: DotProps): ReactElement => {
   const { cx, cy, payload } = props;
   
-  if (!cx || !cy || !payload.isPurchase) {
-    return null;
+  if (!payload.isPurchase) {
+    return <></>;
   }
 
   return (
-    <svg x={cx - 10} y={cy - 10} width={20} height={20}>
-      <circle
-        cx="10"
-        cy="10"
-        r="10"
-        fill="#22c55e"
-        stroke="#fff"
-        strokeWidth={3}
-        filter="url(#glow)"
-      />
-    </svg>
+    <circle
+      cx={cx}
+      cy={cy}
+      r={10}
+      fill="#22c55e"
+      stroke="#fff"
+      strokeWidth={3}
+      filter="url(#glow)"
+    />
   );
 };
 
@@ -100,7 +110,7 @@ export function Chart({ priceData, transactions }: ChartProps) {
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorPrice)"
-              dot={renderDot}
+              dot={CustomDot}
             />
           </AreaChart>
         </ResponsiveContainer>
