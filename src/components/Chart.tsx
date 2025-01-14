@@ -1,36 +1,31 @@
 import { Card } from "@tremor/react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BitcoinPrice, BitcoinTransaction } from "../types";
-import { SVGProps } from "react";
 
 interface ChartProps {
   priceData: BitcoinPrice[];
   transactions: BitcoinTransaction[];
 }
 
-interface DotProps extends SVGProps<SVGElement> {
-  cx?: number;
-  cy?: number;
-  payload?: {
-    isPurchase: boolean;
-  };
-}
-
-const CustomDot = ({ cx, cy, payload }: DotProps) => {
-  if (!cx || !cy || !payload?.isPurchase) {
-    return <circle cx={0} cy={0} r={0} fill="none" />;
-  }
+const renderDot = (props: any) => {
+  const { cx, cy, payload } = props;
   
+  if (!cx || !cy || !payload.isPurchase) {
+    return null;
+  }
+
   return (
-    <circle
-      cx={cx}
-      cy={cy}
-      r={10}
-      fill="#22c55e"
-      stroke="#fff"
-      strokeWidth={3}
-      filter="url(#glow)"
-    />
+    <svg x={cx - 10} y={cy - 10} width={20} height={20}>
+      <circle
+        cx="10"
+        cy="10"
+        r="10"
+        fill="#22c55e"
+        stroke="#fff"
+        strokeWidth={3}
+        filter="url(#glow)"
+      />
+    </svg>
   );
 };
 
@@ -105,7 +100,7 @@ export function Chart({ priceData, transactions }: ChartProps) {
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorPrice)"
-              dot={CustomDot}
+              dot={renderDot}
             />
           </AreaChart>
         </ResponsiveContainer>
