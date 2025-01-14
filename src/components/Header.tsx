@@ -7,49 +7,49 @@ interface HeaderProps {
 
 export function Header({ holdings }: HeaderProps) {
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
+    <>
+      <h1 className="text-2xl md:text-4xl font-bold text-center mb-4 md:mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
         Intesa SanPaolo Bitcoin Holdings Tracker
       </h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50">
-          <Text className="text-blue-300">Total Bitcoin</Text>
-          <Metric className="text-white">{holdings.totalBitcoin.toFixed(2)} BTC</Metric>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50 p-3 md:p-4">
+          <Text className="text-blue-300 text-sm md:text-base">Total Bitcoin</Text>
+          <Metric className="text-white text-xl md:text-2xl">{holdings.totalBitcoin.toFixed(2)} BTC</Metric>
         </Card>
         
-        <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50">
-          <Text className="text-blue-300">Current Value</Text>
-          <div className="space-y-1">
-            <Metric className="text-white">${holdings.valueUSD.toLocaleString()}</Metric>
-            <Text className="text-blue-300">€{holdings.valueEUR.toLocaleString()}</Text>
+        <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50 p-3 md:p-4">
+          <Text className="text-blue-300 text-sm md:text-base">Current Value</Text>
+          <div className="space-y-0 md:space-y-1">
+            <Metric className="text-white text-xl md:text-2xl">${holdings.valueUSD.toLocaleString()}</Metric>
+            <Text className="text-blue-300 text-sm md:text-base">€{holdings.valueEUR.toLocaleString()}</Text>
           </div>
         </Card>
         
-        <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50">
-          <Text className="text-blue-300">Profit/Loss USD</Text>
-          <div className="space-y-1">
-            <Metric className={holdings.pnlUSD >= 0 ? "text-green-400" : "text-red-400"}>
+        <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50 p-3 md:p-4">
+          <Text className="text-blue-300 text-sm md:text-base">Profit/Loss USD</Text>
+          <div className="space-y-0 md:space-y-1">
+            <Metric className={`${holdings.pnlUSD >= 0 ? "text-green-400" : "text-red-400"} text-xl md:text-2xl`}>
               ${holdings.pnlUSD.toLocaleString()}
             </Metric>
-            <Text className={holdings.pnlPercentageUSD >= 0 ? "text-green-400" : "text-red-400"}>
+            <Text className={`${holdings.pnlPercentageUSD >= 0 ? "text-green-400" : "text-red-400"} text-sm md:text-base`}>
               {holdings.pnlPercentageUSD >= 0 ? "+" : ""}{holdings.pnlPercentageUSD.toFixed(2)}%
             </Text>
           </div>
         </Card>
 
-        <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50">
-          <Text className="text-blue-300">Profit/Loss EUR</Text>
-          <div className="space-y-1">
-            <Metric className={holdings.pnlEUR >= 0 ? "text-green-400" : "text-red-400"}>
+        <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50 p-3 md:p-4">
+          <Text className="text-blue-300 text-sm md:text-base">Profit/Loss EUR</Text>
+          <div className="space-y-0 md:space-y-1">
+            <Metric className={`${holdings.pnlEUR >= 0 ? "text-green-400" : "text-red-400"} text-xl md:text-2xl`}>
               €{holdings.pnlEUR.toLocaleString()}
             </Metric>
-            <Text className={holdings.pnlPercentageEUR >= 0 ? "text-green-400" : "text-red-400"}>
+            <Text className={`${holdings.pnlPercentageEUR >= 0 ? "text-green-400" : "text-red-400"} text-sm md:text-base`}>
               {holdings.pnlPercentageEUR >= 0 ? "+" : ""}{holdings.pnlPercentageEUR.toFixed(2)}%
             </Text>
           </div>
         </Card>
       </div>
-    </div>
+    </>
   );
 } 

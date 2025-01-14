@@ -91,11 +91,13 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-900 py-4 space-y-4 flex flex-col">
-      <Header holdings={holdings} />
-      <Chart priceData={priceData} transactions={mockTransactions} />
-      <TransactionTable transactions={mockTransactions} />
-      <footer className="text-center py-2 text-blue-300 mt-auto">
+    <div className="min-h-screen bg-slate-900 flex flex-col">
+      <div className="w-full max-w-6xl mx-auto px-4 py-4 flex-grow space-y-4">
+        <Header holdings={holdings} />
+        <Chart priceData={priceData} transactions={mockTransactions} />
+        <TransactionTable transactions={mockTransactions} />
+      </div>
+      <footer className="text-center py-2 text-blue-300 text-sm">
         Made with ❤️ by{" "}
         <a 
           href="https://x.com/crypto_ita2" 

@@ -17,17 +17,17 @@ export function Chart({ priceData, transactions }: ChartProps) {
   }));
 
   return (
-    <Card className="w-full max-w-6xl mx-auto p-6 bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50">
-      <div className="h-[400px]">
+    <Card className="bg-blue-950 rounded-xl shadow-lg shadow-blue-900/20 border border-blue-800/50">
+      <div className="h-[300px] md:h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ left: 60, right: 20, top: 20, bottom: 20 }}>
+          <AreaChart data={data} margin={{ left: 0, right: 0, top: 20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.8} />
                 <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
               </linearGradient>
               <filter id="glow">
-                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
                 <feMerge>
                   <feMergeNode in="coloredBlur"/>
                   <feMergeNode in="SourceGraphic"/>
@@ -41,14 +41,17 @@ export function Chart({ priceData, transactions }: ChartProps) {
                 return `${date.getDate()}/${date.getMonth() + 1}`;
               }}
               stroke="#94a3b8"
-              interval={7}
+              fontSize={12}
+              interval="preserveStartEnd"
+              tickMargin={10}
               axisLine={{ stroke: '#334155' }}
               tickLine={{ stroke: '#334155' }}
             />
             <YAxis
-              tickFormatter={(value) => `$${Math.round(value).toLocaleString()}`}
+              tickFormatter={(value) => `$${Math.round(value / 1000)}k`}
               stroke="#94a3b8"
-              width={80}
+              fontSize={12}
+              tickMargin={10}
               axisLine={{ stroke: '#334155' }}
               tickLine={{ stroke: '#334155' }}
             />
@@ -57,15 +60,15 @@ export function Chart({ priceData, transactions }: ChartProps) {
                 if (!active || !payload?.length) return null;
                 const data = payload[0].payload;
                 return (
-                  <div className="bg-blue-900/90 p-3 rounded-lg shadow-lg border border-blue-700">
-                    <p className="text-blue-200 text-sm">
+                  <div className="bg-blue-900/90 p-2 rounded-lg shadow-lg border border-blue-700">
+                    <p className="text-blue-200 text-xs">
                       {new Date(data.timestamp).toLocaleDateString()}
                     </p>
-                    <p className="text-white font-bold text-lg">
+                    <p className="text-white font-bold text-sm">
                       ${Math.round(data.price).toLocaleString()}
                     </p>
                     {data.isPurchase && (
-                      <p className="text-green-400 font-bold">Purchase</p>
+                      <p className="text-green-400 font-bold text-xs">Purchase</p>
                     )}
                   </div>
                 );
@@ -86,10 +89,10 @@ export function Chart({ priceData, transactions }: ChartProps) {
                   <circle
                     cx={props.cx}
                     cy={props.cy}
-                    r={10}
+                    r={6}
                     fill="#22c55e"
                     stroke="#fff"
-                    strokeWidth={3}
+                    strokeWidth={2}
                     filter="url(#glow)"
                   />
                 );
