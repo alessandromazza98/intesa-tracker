@@ -1,25 +1,13 @@
 import { Card } from "@tremor/react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BitcoinPrice, BitcoinTransaction } from "../types";
-import { ReactElement } from "react";
 
 interface ChartProps {
   priceData: BitcoinPrice[];
   transactions: BitcoinTransaction[];
 }
 
-type DotProps = {
-  cx: number;
-  cy: number;
-  value: number;
-  payload: {
-    timestamp: number;
-    price: number;
-    isPurchase: boolean;
-  };
-};
-
-const CustomDot = (props: DotProps): ReactElement<SVGElement> => {
+const CustomDot = (props: any) => {
   const { cx, cy, payload } = props;
   
   if (!payload.isPurchase) {
