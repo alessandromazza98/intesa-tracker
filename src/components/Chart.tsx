@@ -90,13 +90,15 @@ export function Chart({ priceData, transactions }: ChartProps) {
               fillOpacity={1}
               fill="url(#colorPrice)"
               dot={(props: any) => {
-                if (!props.payload.isPurchase) {
-                  return <circle cx={0} cy={0} r={0} fill="none" />;
+                const { cx, cy, payload } = props;
+                if (!payload.isPurchase) {
+                  return <circle key={`dot-${payload.timestamp}`} cx={0} cy={0} r={0} fill="none" />;
                 }
                 return (
                   <circle
-                    cx={props.cx}
-                    cy={props.cy}
+                    key={`dot-${payload.timestamp}`}
+                    cx={cx}
+                    cy={cy}
                     r={6}
                     fill="#22c55e"
                     stroke="#fff"

@@ -56,7 +56,7 @@ function App() {
         const pnlPercentageUSD = (pnlUSD / totalInvestedUSD) * 100;
         const pnlPercentageEUR = (pnlEUR / totalInvestedEUR) * 100;
 
-        setHoldings({
+        setH´oldings({
           ...holdings,
           valueUSD: currentValueUSD,
           valueEUR: currentValueEUR,
