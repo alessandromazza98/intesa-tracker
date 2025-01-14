@@ -12,8 +12,10 @@ interface CustomDotProps {
   cy?: number;
 }
 
-const CustomDot = ({ cx, cy }: CustomDotProps) => {
-  if (!cx || !cy) return null;
+const CustomDot = (props: any) => {
+  const { cx, cy, payload } = props;
+  if (!cx || !cy || !payload.isPurchase) return null;
+  
   return (
     <circle
       cx={cx}
@@ -98,7 +100,7 @@ export function Chart({ priceData, transactions }: ChartProps) {
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorPrice)"
-              dot={(props) => (props.payload.isPurchase ? <CustomDot {...props} /> : null)}
+              dot={CustomDot}
             />
           </AreaChart>
         </ResponsiveContainer>
