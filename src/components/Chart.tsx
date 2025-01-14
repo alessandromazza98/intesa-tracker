@@ -19,11 +19,11 @@ type DotProps = {
   };
 };
 
-const CustomDot = (props: DotProps): ReactElement => {
+const CustomDot = (props: DotProps): ReactElement<SVGElement> | null => {
   const { cx, cy, payload } = props;
   
   if (!payload.isPurchase) {
-    return <></>;
+    return null;
   }
 
   return (
