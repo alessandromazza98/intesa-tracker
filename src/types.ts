@@ -2,9 +2,10 @@ export interface BitcoinHolding {
   totalBitcoin: number;
   valueUSD: number;
   valueEUR: number;
-  pnlPercentage: number;
   pnlUSD: number;
   pnlEUR: number;
+  pnlPercentageUSD: number;
+  pnlPercentageEUR: number;
 }
 
 export interface BitcoinTransaction {
