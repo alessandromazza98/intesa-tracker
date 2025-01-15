@@ -25,8 +25,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Get current price endpoint
-app.get('/api/price/:symbol', async (req, res) => {
+// Define route handlers
+const priceHandler = async (req, res) => {
   try {
     const { symbol } = req.params;
     
@@ -56,10 +56,9 @@ app.get('/api/price/:symbol', async (req, res) => {
     };
     res.status(500).json(response);
   }
-});
+};
 
-// Get historical prices endpoint
-app.get('/api/historical/:symbol', async (req, res) => {
+const historicalHandler = async (req, res) => {
   try {
     const { symbol } = req.params;
     const days = parseInt(req.query.days as string) || 7;
@@ -90,7 +89,11 @@ app.get('/api/historical/:symbol', async (req, res) => {
     };
     res.status(500).json(response);
   }
-});
+};
+
+// Mount routes both with and without /api prefix
+app.get('/api/price/:symbol', priceHandler);
+app.get('/api/historical/:symbol', historicalHandler);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
