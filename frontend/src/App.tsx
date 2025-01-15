@@ -5,15 +5,17 @@ import { Chart } from "./components/Chart";
 import { TransactionTable } from "./components/TransactionTable";
 import { BitcoinHolding, BitcoinPrice, BitcoinTransaction } from "./types";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 // Mock data for now - replace with real data from your backend
 const mockTransactions: BitcoinTransaction[] = [
   {
     date: "2025-01-13",
     amount: 11,
-    priceUSD: 93380.72, // Using 1 EUR = 1.03 USD conversion rate
+    priceUSD: 93380.72,
     priceEUR: 90909,
-    totalUSD: 1027187, // 11 * 93380.72
-    totalEUR: 1000000, // 11 * 90909
+    totalUSD: 1027187,
+    totalEUR: 1000000,
   },
 ];
 
@@ -34,8 +36,8 @@ function App() {
       try {
         // Fetch current price and historical data from our backend
         const [currentResponse, historicalResponse] = await Promise.all([
-          axios.get("http://localhost:3000/api/price/bitcoin"),
-          axios.get("http://localhost:3000/api/historical/bitcoin?days=60")
+          axios.get(`${BACKEND_URL}/api/price/bitcoin`),
+          axios.get(`${BACKEND_URL}/api/historical/bitcoin?days=60`)
         ]);
         
         if (!currentResponse.data.success || !historicalResponse.data.success) {

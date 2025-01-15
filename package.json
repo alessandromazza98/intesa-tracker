@@ -10,6 +10,6 @@
     "build": "cd frontend && npm run build && cd ../backend && npm run build"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "9.1.2"
   }
 } 

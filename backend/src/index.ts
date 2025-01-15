@@ -1,11 +1,16 @@
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import path from 'path';
 import { CoinGeckoService } from './services/coingecko';
 import { CacheService } from './services/cache';
 import { ApiResponse } from './types/api';
 
+// Load environment variables from root .env
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3456;
 
 // Initialize services
 const coinGeckoService = new CoinGeckoService();
