@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -21,12 +21,12 @@ app.use(cors());
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
 // Define route handlers
-const priceHandler = async (req, res) => {
+const priceHandler = async (req: Request, res: Response) => {
   try {
     const { symbol } = req.params;
     
@@ -58,7 +58,7 @@ const priceHandler = async (req, res) => {
   }
 };
 
-const historicalHandler = async (req, res) => {
+const historicalHandler = async (req: Request, res: Response) => {
   try {
     const { symbol } = req.params;
     const days = parseInt(req.query.days as string) || 7;
@@ -91,7 +91,7 @@ const historicalHandler = async (req, res) => {
   }
 };
 
-// Mount routes both with and without /api prefix
+// Mount routes
 app.get('/api/price/:symbol', priceHandler);
 app.get('/api/historical/:symbol', historicalHandler);
 
