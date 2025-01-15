@@ -1,50 +1,62 @@
-# React + TypeScript + Vite
+# Banca Intesa Bitcoin Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web application to track Bitcoin investment for Banca Intesa.
 
-Currently, two official plugins are available:
+## Project Structure
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+/banca-intesa-tracker
+  /frontend - React frontend application
+  /backend  - Node.js/Express backend server
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Features
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- Real-time Bitcoin price tracking in USD and EUR
+- Historical price charts
+- Investment performance tracking
+- Multiple API sources with fallback
+- Caching layer to handle rate limits
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+## Development Setup
+
+1. Install dependencies for all projects:
+```bash
+npm run install:all
 ```
+
+2. Start both frontend and backend in development mode:
+```bash
+npm run dev
+```
+
+Or run them separately:
+- Frontend only: `npm run frontend`
+- Backend only: `npm run backend`
+
+The frontend will be available at http://localhost:5173
+The backend API will be available at http://localhost:3000
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+This will build both frontend and backend applications.
+
+## API Endpoints
+
+### Backend API
+
+- `GET /health` - Health check endpoint
+- `GET /api/price/bitcoin` - Get current Bitcoin price in USD and EUR
+- `GET /api/historical/bitcoin?days=60` - Get historical price data
+
+## Contributing
+
+Feel free to open issues and pull requests!
+
+## Author
+
+Made with ❤️ by [Alessandro Mazza](https://x.com/crypto_ita2)

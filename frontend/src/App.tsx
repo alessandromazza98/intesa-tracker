@@ -32,16 +32,20 @@ function App() {
   useEffect(() => {
     const fetchPriceData = async () => {
       try {
-        // Fetch current price and historical data
+        // Fetch current price and historical data from our backend
         const [currentResponse, historicalResponse] = await Promise.all([
-          axios.get("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur"),
-          axios.get("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=60&interval=daily")
+          axios.get("http://localhost:3000/api/price/bitcoin"),
+          axios.get("http://localhost:3000/api/historical/bitcoin?days=60")
         ]);
         
+        if (!currentResponse.data.success || !historicalResponse.data.success) {
+          throw new Error("Failed to fetch data from backend");
+        }
+
         const currentPrice: BitcoinPrice = {
-          usd: currentResponse.data.bitcoin.usd,
-          eur: currentResponse.data.bitcoin.eur,
-          timestamp: Date.now(),
+          usd: currentResponse.data.data.price,
+          eur: currentResponse.data.data.priceEUR,
+          timestamp: currentResponse.data.data.timestamp,
         };
 
         // Calculate current holdings value and PNL
@@ -66,13 +70,16 @@ function App() {
           pnlPercentageEUR,
         });
 
-        // Process historical data
-        const historicalData: BitcoinPrice[] = historicalResponse.data.prices.map(
-          ([timestamp, price]: [number, number]) => ({
-            timestamp,
-            usd: price,
-            eur: price / currentResponse.data.bitcoin.usd * currentResponse.data.bitcoin.eur, // Convert using current exchange rate
-          })
+        // Process historical data - now using both USD and EUR prices
+        const historicalData: BitcoinPrice[] = historicalResponse.data.data.prices.map(
+          (usdPrice: [number, number], index: number) => {
+            const eurPrice = historicalResponse.data.data.pricesEUR[index];
+            return {
+              timestamp: usdPrice[0],
+              usd: usdPrice[1],
+              eur: eurPrice[1],
+            };
+          }
         );
 
         // Add current price to the end of historical data
