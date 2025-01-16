@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { CoinGeckoService } from './services/coingecko';
+import { CoinPaprikaService } from './services/coinpaprika';
+import { CryptoServiceManager } from './services/crypto-service-manager';
 import { CacheService } from './services/cache';
 import { ApiResponse } from './types/api';
 
@@ -13,7 +15,10 @@ const app = express();
 const port = process.env.PORT || 3456;
 
 // Initialize services
-const coinGeckoService = new CoinGeckoService();
+const serviceManager = new CryptoServiceManager([
+  new CoinGeckoService(),
+  new CoinPaprikaService(),
+]);
 const cacheService = new CacheService();
 
 // Middleware
@@ -40,8 +45,8 @@ const priceHandler = async (req: Request, res: Response) => {
       return res.json(response);
     }
 
-    // Get fresh data
-    const price = await coinGeckoService.getCurrentPrice(symbol);
+    // Get fresh data using service manager
+    const price = await serviceManager.getCurrentPrice(symbol);
     cacheService.setCachedPrice(symbol, price);
     
     const response: ApiResponse<typeof price> = {
@@ -73,8 +78,8 @@ const historicalHandler = async (req: Request, res: Response) => {
       return res.json(response);
     }
 
-    // Get fresh data
-    const prices = await coinGeckoService.getHistoricalPrices(symbol, days);
+    // Get fresh data using service manager
+    const prices = await serviceManager.getHistoricalPrices(symbol, days);
     cacheService.setCachedHistoricalPrices(symbol, days, prices);
     
     const response: ApiResponse<typeof prices> = {
