@@ -5,9 +5,9 @@ A web application to track Bitcoin investment for Banca Intesa.
 ## Project Structure
 
 ```
-/banca-intesa-tracker
-  /frontend - React frontend application
-  /backend  - Node.js/Express backend server
+/intesa-tracker
+  |-- /frontend - React frontend application
+  |-- /backend  - Node.js/Express backend server
 ```
 
 ## Features
@@ -35,7 +35,7 @@ Or run them separately:
 - Backend only: `npm run backend`
 
 The frontend will be available at http://localhost:5173
-The backend API will be available at http://localhost:3000
+The backend API will be available at http://localhost:3456
 
 ## Building for Production
 
