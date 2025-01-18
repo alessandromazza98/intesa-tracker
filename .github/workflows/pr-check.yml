@@ -29,13 +29,22 @@ jobs:
       
     - name: Check for sensitive data
       run: |
-        # Exclude node_modules, .git, and .github directories
-        # Only check source files
-        if find frontend/src backend/src -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.github/*" -exec grep -l "API_KEY\|SECRET\|PASSWORD\|PRIVATE_KEY" {} \;; then
-          echo "⚠️ Warning: Possible sensitive data found in source files"
-          echo "Please review the following files:"
-          find frontend/src backend/src -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.github/*" -exec grep -l "API_KEY\|SECRET\|PASSWORD\|PRIVATE_KEY" {} \;
+        echo "Checking for sensitive data in source files..."
+        
+        # First show all matches with context
+        echo "🔍 Scanning files for sensitive patterns..."
+        find frontend/src backend/src -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.github/*" -exec grep -H -n "API_KEY\|SECRET\|PASSWORD\|PRIVATE_KEY" {} \; || true
+        
+        # Then do the actual check
+        FOUND_FILES=$(find frontend/src backend/src -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.github/*" -exec grep -l "API_KEY\|SECRET\|PASSWORD\|PRIVATE_KEY" {} \;)
+        
+        if [ ! -z "$FOUND_FILES" ]; then
+          echo "⚠️ Warning: Possible sensitive data found in these files:"
+          echo "$FOUND_FILES"
+          echo "Please review the matches above and ensure no sensitive data is being committed."
           exit 1
+        else
+          echo "✅ No sensitive data patterns found"
         fi
         
     - name: Check package.json changes
