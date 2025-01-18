@@ -47,33 +47,6 @@ jobs:
           echo "✅ No sensitive data patterns found"
         fi
         
-    - name: Check package.json changes
-      run: |
-        # Fetch all history and tags
-        git fetch origin --unshallow || true
-        
-        # Try to get the base branch, default to listing all files if it fails
-        if git rev-parse --verify origin/main >/dev/null 2>&1; then
-          echo "📦 Package changes in root:"
-          git diff origin/main...HEAD package.json || true
-          echo "📦 Package changes in frontend:"
-          git diff origin/main...HEAD frontend/package.json || true
-          echo "📦 Package changes in backend:"
-          git diff origin/main...HEAD backend/package.json || true
-        else
-          echo "📦 First PR or no main branch, listing all package.json files:"
-          find . -name "package.json" -not -path "*/node_modules/*" -exec echo {} \;
-        fi
-        
-    - name: List all file changes
-      run: |
-        echo "📝 Changed files:"
-        if git rev-parse --verify origin/main >/dev/null 2>&1; then
-          git diff --name-status origin/main...HEAD
-        else
-          echo "First PR or no main branch, listing all tracked files:"
-          git ls-files
-        
     - name: Start Backend
       run: |
         cd backend
