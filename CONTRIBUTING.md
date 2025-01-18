@@ -21,6 +21,8 @@ Pull requests are the best way to propose changes to the codebase. I actively we
 
 Make sure that your PR works locally by running the following commands:
 
+- `npm run format`
+- `npm run lint`
 - `npm run install:all`
 - `npm run dev`
 
