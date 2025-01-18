@@ -99,6 +99,19 @@ jobs:
         PR_NAME="pr-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}-${{ github.event.number }}"
         echo "Creating preview for $PR_NAME"
         
+        # Get owner ID first
+        echo "Getting owner ID..."
+        OWNER_INFO=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" https://api.render.com/v1/owners)
+        OWNER_ID=$(echo "$OWNER_INFO" | jq -r '.[0].id')
+        
+        if [ -z "$OWNER_ID" ]; then
+          echo "❌ Failed to get owner ID"
+          echo "Owner info response: $OWNER_INFO"
+          exit 1
+        fi
+        
+        echo "Owner ID: $OWNER_ID"
+        
         # Deploy backend service
         echo "Creating backend service..."
         BACKEND_RESPONSE=$(curl -X POST https://api.render.com/v1/services \
@@ -113,6 +126,7 @@ jobs:
             "envVars": [
               {"key": "PORT", "value": "3456"}
             ],
+            "ownerId": "'$OWNER_ID'",
             "autoDeploy": "no"
           }')
         
@@ -163,6 +177,7 @@ jobs:
             "envVars": [
               {"key": "VITE_BACKEND_URL", "value": "'$BACKEND_URL'"}
             ],
+            "ownerId": "'$OWNER_ID'",
             "autoDeploy": "no"
           }')
         
