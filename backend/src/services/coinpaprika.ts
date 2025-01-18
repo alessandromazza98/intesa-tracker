@@ -69,12 +69,12 @@ export class CoinPaprikaService implements CryptoApiService {
       }),
     ]);
 
-    const prices = usdResponse.data.map((item: CoinPaprikaHistoricalDataPoint) => [
+    const prices: Array<[number, number]> = usdResponse.data.map((item: CoinPaprikaHistoricalDataPoint) => [
       new Date(item.timestamp).getTime(),
       item.price,
     ]);
 
-    const pricesEUR = eurResponse.data.map((item: CoinPaprikaHistoricalDataPoint) => [
+    const pricesEUR: Array<[number, number]> = eurResponse.data.map((item: CoinPaprikaHistoricalDataPoint) => [
       new Date(item.timestamp).getTime(),
       item.price,
     ]);

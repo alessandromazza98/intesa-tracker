@@ -31,12 +31,12 @@ app.use(cors());
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (req: Request, res: Response): void => {
+app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
 // Define route handlers
-const priceHandler = async (req: Request, res: Response): Promise<void> => {
+const priceHandler = async (req: Request, res: Response) => {
   try {
     const { symbol } = req.params;
 
@@ -68,7 +68,7 @@ const priceHandler = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const historicalHandler = async (req: Request, res: Response): Promise<void> => {
+const historicalHandler = async (req: Request, res: Response) => {
   try {
     const { symbol } = req.params;
     const days = parseInt(req.query.days as string) || 7;
