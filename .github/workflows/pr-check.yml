@@ -102,24 +102,16 @@ jobs:
         # Get owner ID first
         echo "Getting owner ID..."
         OWNER_INFO=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" https://api.render.com/v1/owners)
-        echo "Owner info response:"
-        echo "$OWNER_INFO"
         
-        # Try to get the owner ID, handling both single object and array responses
-        if echo "$OWNER_INFO" | jq -e 'if type == "array" then .[0] else . end' > /dev/null; then
-          OWNER_ID=$(echo "$OWNER_INFO" | jq -r 'if type == "array" then .[0].id else .id end')
-        else
-          echo "❌ Invalid response format from /v1/owners"
-          exit 1
-        fi
+        # Extract the owner ID from the nested structure
+        OWNER_ID=$(echo "$OWNER_INFO" | jq -r '.[0].owner.id')
         
         if [ -z "$OWNER_ID" ] || [ "$OWNER_ID" = "null" ]; then
           echo "❌ Failed to get owner ID"
-          echo "Owner info response: $OWNER_INFO"
           exit 1
         fi
         
-        echo "Owner ID: $OWNER_ID"
+        echo "Using Render team ID: ${OWNER_ID:0:8}..." # Only show first 8 chars
         
         # Deploy backend service
         echo "Creating backend service..."
