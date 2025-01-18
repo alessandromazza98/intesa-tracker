@@ -113,9 +113,35 @@ jobs:
         
         echo "Using Render team ID: ${OWNER_ID:0:8}..." # Only show first 8 chars
         
-        # Deploy backend service
+        # Create backend service
         echo "Creating backend service..."
-        BACKEND_JSON='{"name":"'$PR_NAME'-backend","type":"web_service","runtime":"node","buildCommand":"cd backend && npm install && npm run build","startCommand":"cd backend && npm run start","envVars":[{"key":"PORT","value":"3456"}],"ownerId":"'$OWNER_ID'","serviceDetails":{"plan":"free","pullRequestPreviewsEnabled":true,"region":"oregon","env":"node","rootDir":".","numInstances":1,"healthCheckPath":"/health","buildFilter":{"paths":["backend/**"]}},"autoDeploy":"no"}'
+        BACKEND_JSON=$(jq -n \
+          --arg name "$PR_NAME-backend" \
+          --arg owner "$OWNER_ID" \
+          '{
+            name: $name,
+            type: "web_service",
+            runtime: "node",
+            buildCommand: "cd backend && npm install && npm run build",
+            startCommand: "cd backend && npm run start",
+            envVars: [
+              {key: "PORT", value: "3456"}
+            ],
+            ownerId: $owner,
+            serviceDetails: {
+              plan: "free",
+              pullRequestPreviewsEnabled: true,
+              region: "oregon",
+              env: "node",
+              rootDir: ".",
+              numInstances: 1,
+              healthCheckPath: "/health",
+              buildFilter: {
+                paths: ["backend/**"]
+              }
+            },
+            autoDeploy: "no"
+          }')
         
         BACKEND_RESPONSE=$(curl -X POST https://api.render.com/v1/services \
           -H "Authorization: Bearer $RENDER_API_KEY" \
@@ -156,9 +182,31 @@ jobs:
         
         echo "Backend URL: $BACKEND_URL"
         
-        # Deploy frontend service
+        # Create frontend service
         echo "Creating frontend service..."
-        FRONTEND_JSON='{"name":"'$PR_NAME'-frontend","type":"static_site","buildCommand":"cd frontend && npm install && npm run build","publishPath":"frontend/dist","envVars":[{"key":"VITE_BACKEND_URL","value":"'$BACKEND_URL'"}],"ownerId":"'$OWNER_ID'","serviceDetails":{"plan":"free","pullRequestPreviewsEnabled":true,"region":"oregon","buildFilter":{"paths":["frontend/**"]}},"autoDeploy":"no"}'
+        FRONTEND_JSON=$(jq -n \
+          --arg name "$PR_NAME-frontend" \
+          --arg owner "$OWNER_ID" \
+          --arg backend_url "$BACKEND_URL" \
+          '{
+            name: $name,
+            type: "static_site",
+            buildCommand: "cd frontend && npm install && npm run build",
+            publishPath: "frontend/dist",
+            envVars: [
+              {key: "VITE_BACKEND_URL", value: $backend_url}
+            ],
+            ownerId: $owner,
+            serviceDetails: {
+              plan: "free",
+              pullRequestPreviewsEnabled: true,
+              region: "oregon",
+              buildFilter: {
+                paths: ["frontend/**"]
+              }
+            },
+            autoDeploy: "no"
+          }')
         
         FRONTEND_RESPONSE=$(curl -X POST https://api.render.com/v1/services \
           -H "Authorization: Bearer $RENDER_API_KEY" \
