@@ -21,4 +21,4 @@ export interface CryptoApiService {
   getName(): string;
   getCurrentPrice(symbol: string): Promise<CryptoPrice>;
   getHistoricalPrices(symbol: string, days: number): Promise<HistoricalPrice>;
-} 
+}

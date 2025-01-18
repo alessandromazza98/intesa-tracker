@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import winston from 'winston';
 import { CoinGeckoService } from './services/coingecko';
 import { CoinPaprikaService } from './services/coinpaprika';
 import { CryptoServiceManager } from './services/crypto-service-manager';
@@ -11,14 +12,18 @@ import { ApiResponse } from './types/api';
 // Load environment variables from root .env
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+// Setup logger
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.simple(),
+  transports: [new winston.transports.Console()],
+});
+
 const app = express();
 const port = process.env.PORT || 3456;
 
 // Initialize services
-const serviceManager = new CryptoServiceManager([
-  new CoinGeckoService(),
-  new CoinPaprikaService(),
-]);
+const serviceManager = new CryptoServiceManager([new CoinGeckoService(), new CoinPaprikaService()]);
 const cacheService = new CacheService();
 
 // Middleware
@@ -26,21 +31,21 @@ app.use(cors());
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (req: Request, res: Response): void => {
   res.json({ status: 'ok' });
 });
 
 // Define route handlers
-const priceHandler = async (req: Request, res: Response) => {
+const priceHandler = async (req: Request, res: Response): Promise<void> => {
   try {
     const { symbol } = req.params;
-    
+
     // Check cache first
     const cachedPrice = cacheService.getCachedPrice(symbol);
     if (cachedPrice) {
       const response: ApiResponse<typeof cachedPrice> = {
         success: true,
-        data: cachedPrice
+        data: cachedPrice,
       };
       return res.json(response);
     }
@@ -48,22 +53,22 @@ const priceHandler = async (req: Request, res: Response) => {
     // Get fresh data using service manager
     const price = await serviceManager.getCurrentPrice(symbol);
     cacheService.setCachedPrice(symbol, price);
-    
+
     const response: ApiResponse<typeof price> = {
       success: true,
-      data: price
+      data: price,
     };
     res.json(response);
   } catch (error) {
     const response: ApiResponse<null> = {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     };
     res.status(500).json(response);
   }
 };
 
-const historicalHandler = async (req: Request, res: Response) => {
+const historicalHandler = async (req: Request, res: Response): Promise<void> => {
   try {
     const { symbol } = req.params;
     const days = parseInt(req.query.days as string) || 7;
@@ -73,7 +78,7 @@ const historicalHandler = async (req: Request, res: Response) => {
     if (cachedPrices) {
       const response: ApiResponse<typeof cachedPrices> = {
         success: true,
-        data: cachedPrices
+        data: cachedPrices,
       };
       return res.json(response);
     }
@@ -81,16 +86,16 @@ const historicalHandler = async (req: Request, res: Response) => {
     // Get fresh data using service manager
     const prices = await serviceManager.getHistoricalPrices(symbol, days);
     cacheService.setCachedHistoricalPrices(symbol, days, prices);
-    
+
     const response: ApiResponse<typeof prices> = {
       success: true,
-      data: prices
+      data: prices,
     };
     res.json(response);
   } catch (error) {
     const response: ApiResponse<null> = {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     };
     res.status(500).json(response);
   }
@@ -101,5 +106,5 @@ app.get('/api/price/:symbol', priceHandler);
 app.get('/api/historical/:symbol', historicalHandler);
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-}); 
+  logger.info(`Server is running on port ${port}`);
+});

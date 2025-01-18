@@ -8,7 +8,9 @@
     "dev": "concurrently \"npm run frontend\" \"npm run backend\"",
     "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
     "build": "cd frontend && npm run build && cd ../backend && npm run build",
-    "lint": "cd frontend && npm run lint && cd ../backend && npm run lint"
+    "lint": "cd frontend && npm run lint && cd ../backend && npm run lint",
+    "format": "cd frontend && npm run format && cd ../backend && npm run format",
+    "format:check": "cd frontend && npm run format:check && cd ../backend && npm run format:check"
   },
   "devDependencies": {
     "concurrently": "9.1.2"

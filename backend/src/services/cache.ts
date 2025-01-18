@@ -1,17 +1,23 @@
 import NodeCache from 'node-cache';
 import { CryptoPrice, HistoricalPrice } from '../types/api';
 
+interface CacheParams {
+  days?: number;
+  [key: string]: unknown;
+}
+
 export class CacheService {
   private cache: NodeCache;
 
-  constructor(stdTTL: number = 300) { // 5 minutes default TTL
+  constructor(stdTTL: number = 300) {
+    // 5 minutes default TTL
     this.cache = new NodeCache({
       stdTTL,
       checkperiod: stdTTL * 0.2,
     });
   }
 
-  private getKey(type: string, symbol: string, params?: any): string {
+  private getKey(type: string, symbol: string, params?: CacheParams): string {
     return `${type}:${symbol}${params ? ':' + JSON.stringify(params) : ''}`;
   }
 
@@ -38,4 +44,4 @@ export class CacheService {
   clearCache(): void {
     this.cache.flushAll();
   }
-} 
+}

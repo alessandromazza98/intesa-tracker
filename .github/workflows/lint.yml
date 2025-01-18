@@ -1,4 +1,4 @@
-name: Lint
+name: Lint and Format
 
 on:
   push:
@@ -22,5 +22,8 @@ jobs:
     - name: Install Dependencies
       run: npm run install:all
       
+    - name: Check Format
+      run: npm run format:check
+      
     - name: Run Lint
-      run: npm run lint lg
+      run: npm run lint

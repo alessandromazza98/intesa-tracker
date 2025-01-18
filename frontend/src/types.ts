@@ -21,4 +21,4 @@ export interface BitcoinPrice {
   usd: number;
   eur: number;
   timestamp: number;
-} 
+}

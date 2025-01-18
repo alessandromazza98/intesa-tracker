@@ -10,11 +10,11 @@ export class CoinGeckoService implements CryptoApiService {
     return 'CoinGecko';
   }
 
-  private async throttleCall() {
+  private async throttleCall(): Promise<void> {
     const now = Date.now();
     const timeSinceLastCall = now - this.lastCallTimestamp;
     if (timeSinceLastCall < this.minCallInterval) {
-      await new Promise(resolve => setTimeout(resolve, this.minCallInterval - timeSinceLastCall));
+      await new Promise((resolve) => setTimeout(resolve, this.minCallInterval - timeSinceLastCall));
     }
     this.lastCallTimestamp = Date.now();
   }
@@ -24,15 +24,15 @@ export class CoinGeckoService implements CryptoApiService {
     const response = await axios.get(`${this.baseUrl}/simple/price`, {
       params: {
         ids: symbol,
-        vs_currencies: 'usd,eur'
-      }
+        vs_currencies: 'usd,eur',
+      },
     });
 
     return {
       price: response.data[symbol].usd,
       priceEUR: response.data[symbol].eur,
       timestamp: Date.now(),
-      source: this.getName()
+      source: this.getName(),
     };
   }
 
@@ -43,22 +43,22 @@ export class CoinGeckoService implements CryptoApiService {
         params: {
           vs_currency: 'usd',
           days: days,
-          interval: 'daily'
-        }
+          interval: 'daily',
+        },
       }),
       axios.get(`${this.baseUrl}/coins/${symbol}/market_chart`, {
         params: {
           vs_currency: 'eur',
           days: days,
-          interval: 'daily'
-        }
-      })
+          interval: 'daily',
+        },
+      }),
     ]);
 
     return {
       prices: usdResponse.data.prices,
       pricesEUR: eurResponse.data.prices,
-      source: this.getName()
+      source: this.getName(),
     };
   }
-} 
+}
