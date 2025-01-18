@@ -118,12 +118,14 @@ jobs:
         BACKEND_JSON=$(jq -n \
           --arg name "$PR_NAME-backend" \
           --arg owner "$OWNER_ID" \
+          --arg build_cmd "cd backend && npm install && npm run build" \
+          --arg start_cmd "cd backend && npm run start" \
           '{
             name: $name,
             type: "web_service",
             runtime: "node",
-            buildCommand: "cd backend && npm install && npm run build",
-            startCommand: "cd backend && npm run start",
+            buildCommand: $build_cmd,
+            startCommand: $start_cmd,
             envVars: [
               {key: "PORT", value: "3456"}
             ],
@@ -143,6 +145,15 @@ jobs:
             autoDeploy: "no"
           }')
         
+        # Validate JSON before sending
+        echo "Validating JSON..."
+        if ! echo "$BACKEND_JSON" | jq '.' > /dev/null 2>&1; then
+          echo "❌ Invalid JSON:"
+          echo "$BACKEND_JSON"
+          exit 1
+        fi
+        
+        echo "Sending request to create backend service..."
         BACKEND_RESPONSE=$(curl -X POST https://api.render.com/v1/services \
           -H "Authorization: Bearer $RENDER_API_KEY" \
           -H "Content-Type: application/json" \
@@ -188,10 +199,11 @@ jobs:
           --arg name "$PR_NAME-frontend" \
           --arg owner "$OWNER_ID" \
           --arg backend_url "$BACKEND_URL" \
+          --arg build_cmd "cd frontend && npm install && npm run build" \
           '{
             name: $name,
             type: "static_site",
-            buildCommand: "cd frontend && npm install && npm run build",
+            buildCommand: $build_cmd,
             publishPath: "frontend/dist",
             envVars: [
               {key: "VITE_BACKEND_URL", value: $backend_url}
@@ -208,6 +220,15 @@ jobs:
             autoDeploy: "no"
           }')
         
+        # Validate JSON before sending
+        echo "Validating JSON..."
+        if ! echo "$FRONTEND_JSON" | jq '.' > /dev/null 2>&1; then
+          echo "❌ Invalid JSON:"
+          echo "$FRONTEND_JSON"
+          exit 1
+        fi
+        
+        echo "Sending request to create frontend service..."
         FRONTEND_RESPONSE=$(curl -X POST https://api.render.com/v1/services \
           -H "Authorization: Bearer $RENDER_API_KEY" \
           -H "Content-Type: application/json" \
