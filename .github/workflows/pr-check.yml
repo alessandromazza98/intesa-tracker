@@ -160,21 +160,23 @@ jobs:
         fi
         
         echo "Sending request to create backend service..."
+        # Capture response headers and body separately
         BACKEND_RESPONSE=$(curl -v -X POST https://api.render.com/v1/services \
           -H "Authorization: Bearer $RENDER_API_KEY" \
           -H "Content-Type: application/json" \
-          -d "$BACKEND_JSON" 2>&1)
+          -d "$BACKEND_JSON" 2>curl_stderr)
         
         echo "Backend service creation response:"
         echo "$BACKEND_RESPONSE"
         
-        # Store the response in a file for debugging
-        echo "$BACKEND_RESPONSE" > backend_response.txt
+        # For debugging, show the curl output
+        echo "Curl debug output:"
+        cat curl_stderr
         
         # Try to extract the ID, but first check if we can parse the response
         if ! echo "$BACKEND_RESPONSE" | jq '.' > /dev/null 2>&1; then
           echo "❌ Invalid JSON response from Render API:"
-          echo "Raw response saved to backend_response.txt"
+          echo "Response: $BACKEND_RESPONSE"
           exit 1
         fi
         
@@ -251,21 +253,23 @@ jobs:
         fi
         
         echo "Sending request to create frontend service..."
-        FRONTEND_RESPONSE=$(curl -X POST https://api.render.com/v1/services \
+        # Capture response headers and body separately
+        FRONTEND_RESPONSE=$(curl -v -X POST https://api.render.com/v1/services \
           -H "Authorization: Bearer $RENDER_API_KEY" \
           -H "Content-Type: application/json" \
-          -d "$FRONTEND_JSON")
+          -d "$FRONTEND_JSON" 2>curl_stderr_frontend)
         
         echo "Frontend service creation response:"
         echo "$FRONTEND_RESPONSE"
         
-        # Store the response in a file for debugging
-        echo "$FRONTEND_RESPONSE" > frontend_response.txt
+        # For debugging, show the curl output
+        echo "Curl debug output:"
+        cat curl_stderr_frontend
         
         # Try to extract the ID, but first check if we can parse the response
         if ! echo "$FRONTEND_RESPONSE" | jq '.' > /dev/null 2>&1; then
           echo "❌ Invalid JSON response from Render API:"
-          echo "Raw response saved to frontend_response.txt"
+          echo "Response: $FRONTEND_RESPONSE"
           exit 1
         fi
         
