@@ -141,22 +141,8 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          const pkgDiff = require('child_process')
-            .execSync('git diff origin/main...HEAD "**/package.json"')
-            .toString();
-            
-          const files = require('child_process')
-            .execSync('git diff --name-status origin/main...HEAD')
-            .toString();
-            
-          let comment = '## PR Build Status\n\n';
-          comment += '✅ Build completed successfully\n\n';
+          let comment = '## PR Check Results\n\n';
           
-          if (pkgDiff) {
-            comment += '### Package Changes\n\n```diff\n' + pkgDiff + '\n```\n\n';
-          }
-          
-          comment += '### Changed Files\n\n```\n' + files + '\n```\n\n';
           comment += '### Application Tests\n\n';
           comment += '✅ Backend started successfully\n';
           comment += '✅ Frontend started successfully\n';
@@ -167,7 +153,7 @@ jobs:
           comment += `🔗 Backend API: ${process.env.BACKEND_URL}\n\n`;
           comment += '⏳ Preview environment is being deployed and will be ready in a few minutes.\n\n';
           
-          comment += '⚠️ Please review these changes carefully before merging!';
+          comment += '⚠️ Please test the preview deployment before merging!';
           
           await github.rest.issues.createComment({
             owner: context.repo.owner,
