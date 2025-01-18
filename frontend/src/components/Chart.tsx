@@ -1,6 +1,6 @@
-import { Card } from "@tremor/react";
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { BitcoinPrice, BitcoinTransaction } from "../types";
+import { Card } from '@tremor/react';
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { BitcoinPrice, BitcoinTransaction } from '../types';
 
 interface ChartProps {
   priceData: BitcoinPrice[];
@@ -11,9 +11,7 @@ export function Chart({ priceData, transactions }: ChartProps) {
   const data = priceData.map((price) => ({
     timestamp: price.timestamp,
     price: price.usd,
-    isPurchase: transactions.some(
-      (t) => new Date(t.date).getTime() === price.timestamp
-    ),
+    isPurchase: transactions.some((t) => new Date(t.date).getTime() === price.timestamp),
   }));
 
   // Function to determine interval based on screen width
@@ -33,10 +31,10 @@ export function Chart({ priceData, transactions }: ChartProps) {
                 <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
               </linearGradient>
               <filter id="glow">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
                 <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
             </defs>
@@ -89,10 +87,16 @@ export function Chart({ priceData, transactions }: ChartProps) {
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorPrice)"
-              dot={(props: any) => {
+              dot={(props: {
+                cx: number;
+                cy: number;
+                payload: BitcoinPrice & { isPurchase?: boolean };
+              }) => {
                 const { cx, cy, payload } = props;
                 if (!payload.isPurchase) {
-                  return <circle key={`dot-${payload.timestamp}`} cx={0} cy={0} r={0} fill="none" />;
+                  return (
+                    <circle key={`dot-${payload.timestamp}`} cx={0} cy={0} r={0} fill="none" />
+                  );
                 }
                 return (
                   <circle
@@ -113,4 +117,4 @@ export function Chart({ priceData, transactions }: ChartProps) {
       </div>
     </Card>
   );
-} 
+}
