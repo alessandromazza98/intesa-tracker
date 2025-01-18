@@ -116,8 +116,36 @@ jobs:
         # Create backend service
         echo "Creating backend service..."
         
-        # Create JSON payload
-        BACKEND_JSON='{"name":"'$PR_NAME'-backend","type":"web_service","runtime":"node","buildCommand":"cd backend && npm install && npm run build","startCommand":"cd backend && npm run start","envVars":[{"key":"PORT","value":"3456"}],"ownerId":"'$OWNER_ID'","serviceDetails":{"plan":"free","pullRequestPreviewsEnabled":true,"region":"oregon","env":"node","rootDir":".","numInstances":1,"healthCheckPath":"/health","buildFilter":{"paths":["backend/**"]}},"autoDeploy":"no"}'
+        # Create JSON payload using jq for proper escaping
+        BACKEND_JSON=$(jq -n \
+          --arg name "$PR_NAME-backend" \
+          --arg owner "$OWNER_ID" \
+          --arg build_cmd "cd backend && npm install && npm run build" \
+          --arg start_cmd "cd backend && npm run start" \
+          '{
+            name: $name,
+            type: "web_service",
+            runtime: "node",
+            buildCommand: $build_cmd,
+            startCommand: $start_cmd,
+            envVars: [
+              {key: "PORT", value: "3456"}
+            ],
+            ownerId: $owner,
+            serviceDetails: {
+              plan: "free",
+              pullRequestPreviewsEnabled: true,
+              region: "oregon",
+              env: "node",
+              rootDir: ".",
+              numInstances: 1,
+              healthCheckPath: "/health",
+              buildFilter: {
+                paths: ["backend/**"]
+              }
+            },
+            autoDeploy: "no"
+          }')
         
         # Debug: Print the JSON payload
         echo "Debug: JSON payload for backend service:"
@@ -139,6 +167,16 @@ jobs:
         
         echo "Backend service creation response:"
         echo "$BACKEND_RESPONSE"
+        
+        # Store the response in a file for debugging
+        echo "$BACKEND_RESPONSE" > backend_response.txt
+        
+        # Try to extract the ID, but first check if we can parse the response
+        if ! echo "$BACKEND_RESPONSE" | jq '.' > /dev/null 2>&1; then
+          echo "❌ Invalid JSON response from Render API:"
+          echo "Raw response saved to backend_response.txt"
+          exit 1
+        fi
         
         BACKEND_ID=$(echo "$BACKEND_RESPONSE" | jq -r '.service.id // empty')
         if [ -z "$BACKEND_ID" ]; then
@@ -174,8 +212,31 @@ jobs:
         # Create frontend service
         echo "Creating frontend service..."
         
-        # Create JSON payload
-        FRONTEND_JSON='{"name":"'$PR_NAME'-frontend","type":"static_site","buildCommand":"cd frontend && npm install && npm run build","publishPath":"frontend/dist","envVars":[{"key":"VITE_BACKEND_URL","value":"'$BACKEND_URL'"}],"ownerId":"'$OWNER_ID'","serviceDetails":{"plan":"free","pullRequestPreviewsEnabled":true,"region":"oregon","buildFilter":{"paths":["frontend/**"]}},"autoDeploy":"no"}'
+        # Create JSON payload using jq for proper escaping
+        FRONTEND_JSON=$(jq -n \
+          --arg name "$PR_NAME-frontend" \
+          --arg owner "$OWNER_ID" \
+          --arg backend_url "$BACKEND_URL" \
+          --arg build_cmd "cd frontend && npm install && npm run build" \
+          '{
+            name: $name,
+            type: "static_site",
+            buildCommand: $build_cmd,
+            publishPath: "frontend/dist",
+            envVars: [
+              {key: "VITE_BACKEND_URL", value: $backend_url}
+            ],
+            ownerId: $owner,
+            serviceDetails: {
+              plan: "free",
+              pullRequestPreviewsEnabled: true,
+              region: "oregon",
+              buildFilter: {
+                paths: ["frontend/**"]
+              }
+            },
+            autoDeploy: "no"
+          }')
         
         # Debug: Print the JSON payload
         echo "Debug: JSON payload for frontend service:"
@@ -197,6 +258,16 @@ jobs:
         
         echo "Frontend service creation response:"
         echo "$FRONTEND_RESPONSE"
+        
+        # Store the response in a file for debugging
+        echo "$FRONTEND_RESPONSE" > frontend_response.txt
+        
+        # Try to extract the ID, but first check if we can parse the response
+        if ! echo "$FRONTEND_RESPONSE" | jq '.' > /dev/null 2>&1; then
+          echo "❌ Invalid JSON response from Render API:"
+          echo "Raw response saved to frontend_response.txt"
+          exit 1
+        fi
         
         FRONTEND_ID=$(echo "$FRONTEND_RESPONSE" | jq -r '.service.id // empty')
         if [ -z "$FRONTEND_ID" ]; then
