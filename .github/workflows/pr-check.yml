@@ -29,8 +29,12 @@ jobs:
       
     - name: Check for sensitive data
       run: |
-        if grep -r "API_KEY\|SECRET\|PASSWORD" .; then
-          echo "⚠️ Warning: Possible sensitive data found in the code"
+        # Exclude node_modules, .git, and .github directories
+        # Only check source files
+        if find frontend/src backend/src -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.github/*" -exec grep -l "API_KEY\|SECRET\|PASSWORD\|PRIVATE_KEY" {} \;; then
+          echo "⚠️ Warning: Possible sensitive data found in source files"
+          echo "Please review the following files:"
+          find frontend/src backend/src -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.github/*" -exec grep -l "API_KEY\|SECRET\|PASSWORD\|PRIVATE_KEY" {} \;
           exit 1
         fi
         
