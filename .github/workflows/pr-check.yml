@@ -115,35 +115,13 @@ jobs:
         
         # Create backend service
         echo "Creating backend service..."
-        BACKEND_JSON=$(jq -n \
-          --arg name "$PR_NAME-backend" \
-          --arg owner "$OWNER_ID" \
-          --arg build_cmd "cd backend && npm install && npm run build" \
-          --arg start_cmd "cd backend && npm run start" \
-          '{
-            name: $name,
-            type: "web_service",
-            runtime: "node",
-            buildCommand: $build_cmd,
-            startCommand: $start_cmd,
-            envVars: [
-              {key: "PORT", value: "3456"}
-            ],
-            ownerId: $owner,
-            serviceDetails: {
-              plan: "free",
-              pullRequestPreviewsEnabled: true,
-              region: "oregon",
-              env: "node",
-              rootDir: ".",
-              numInstances: 1,
-              healthCheckPath: "/health",
-              buildFilter: {
-                paths: ["backend/**"]
-              }
-            },
-            autoDeploy: "no"
-          }')
+        
+        # Create JSON payload
+        BACKEND_JSON='{"name":"'$PR_NAME'-backend","type":"web_service","runtime":"node","buildCommand":"cd backend && npm install && npm run build","startCommand":"cd backend && npm run start","envVars":[{"key":"PORT","value":"3456"}],"ownerId":"'$OWNER_ID'","serviceDetails":{"plan":"free","pullRequestPreviewsEnabled":true,"region":"oregon","env":"node","rootDir":".","numInstances":1,"healthCheckPath":"/health","buildFilter":{"paths":["backend/**"]}},"autoDeploy":"no"}'
+        
+        # Debug: Print the JSON payload
+        echo "Debug: JSON payload for backend service:"
+        echo "$BACKEND_JSON" | jq '.'
         
         # Validate JSON before sending
         echo "Validating JSON..."
@@ -154,10 +132,10 @@ jobs:
         fi
         
         echo "Sending request to create backend service..."
-        BACKEND_RESPONSE=$(curl -X POST https://api.render.com/v1/services \
+        BACKEND_RESPONSE=$(curl -v -X POST https://api.render.com/v1/services \
           -H "Authorization: Bearer $RENDER_API_KEY" \
           -H "Content-Type: application/json" \
-          -d "$BACKEND_JSON")
+          -d "$BACKEND_JSON" 2>&1)
         
         echo "Backend service creation response:"
         echo "$BACKEND_RESPONSE"
@@ -195,30 +173,13 @@ jobs:
         
         # Create frontend service
         echo "Creating frontend service..."
-        FRONTEND_JSON=$(jq -n \
-          --arg name "$PR_NAME-frontend" \
-          --arg owner "$OWNER_ID" \
-          --arg backend_url "$BACKEND_URL" \
-          --arg build_cmd "cd frontend && npm install && npm run build" \
-          '{
-            name: $name,
-            type: "static_site",
-            buildCommand: $build_cmd,
-            publishPath: "frontend/dist",
-            envVars: [
-              {key: "VITE_BACKEND_URL", value: $backend_url}
-            ],
-            ownerId: $owner,
-            serviceDetails: {
-              plan: "free",
-              pullRequestPreviewsEnabled: true,
-              region: "oregon",
-              buildFilter: {
-                paths: ["frontend/**"]
-              }
-            },
-            autoDeploy: "no"
-          }')
+        
+        # Create JSON payload
+        FRONTEND_JSON='{"name":"'$PR_NAME'-frontend","type":"static_site","buildCommand":"cd frontend && npm install && npm run build","publishPath":"frontend/dist","envVars":[{"key":"VITE_BACKEND_URL","value":"'$BACKEND_URL'"}],"ownerId":"'$OWNER_ID'","serviceDetails":{"plan":"free","pullRequestPreviewsEnabled":true,"region":"oregon","buildFilter":{"paths":["frontend/**"]}},"autoDeploy":"no"}'
+        
+        # Debug: Print the JSON payload
+        echo "Debug: JSON payload for frontend service:"
+        echo "$FRONTEND_JSON" | jq '.'
         
         # Validate JSON before sending
         echo "Validating JSON..."
