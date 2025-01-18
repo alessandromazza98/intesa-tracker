@@ -89,7 +89,7 @@ export function Chart({ priceData, transactions }: ChartProps) {
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorPrice)"
-              dot={(props: any) => {
+              dot={(props: { cx: number; cy: number; payload: BitcoinPrice & { isPurchase?: boolean } }) => {
                 const { cx, cy, payload } = props;
                 if (!payload.isPurchase) {
                   return <circle key={`dot-${payload.timestamp}`} cx={0} cy={0} r={0} fill="none" />;

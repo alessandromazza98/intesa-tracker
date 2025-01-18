@@ -97,7 +97,7 @@ function App() {
     const interval = setInterval(fetchPriceData, 15 * 60 * 1000); // Fetch every 15 minutes
 
     return () => clearInterval(interval);
-  }, []);
+  }, [holdings]);
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col">
