@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CryptoApiService, CryptoPrice, HistoricalPrice } from '../types/api';
+import { CryptoApiService, CryptoPrice, HistoricalPrice } from '../types/api.js';
 
 interface CoinPaprikaHistoricalDataPoint {
   timestamp: string;
@@ -69,15 +69,13 @@ export class CoinPaprikaService implements CryptoApiService {
       }),
     ]);
 
-    const prices: Array<[number, number]> = usdResponse.data.map((item: CoinPaprikaHistoricalDataPoint) => [
-      new Date(item.timestamp).getTime(),
-      item.price,
-    ]);
+    const prices: Array<[number, number]> = usdResponse.data.map(
+      (item: CoinPaprikaHistoricalDataPoint) => [new Date(item.timestamp).getTime(), item.price]
+    );
 
-    const pricesEUR: Array<[number, number]> = eurResponse.data.map((item: CoinPaprikaHistoricalDataPoint) => [
-      new Date(item.timestamp).getTime(),
-      item.price,
-    ]);
+    const pricesEUR: Array<[number, number]> = eurResponse.data.map(
+      (item: CoinPaprikaHistoricalDataPoint) => [new Date(item.timestamp).getTime(), item.price]
+    );
 
     return {
       prices,

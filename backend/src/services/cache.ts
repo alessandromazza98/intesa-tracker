@@ -1,5 +1,5 @@
 import NodeCache from 'node-cache';
-import { CryptoPrice, HistoricalPrice } from '../types/api';
+import { CryptoPrice, HistoricalPrice } from '../types/api.js';
 
 interface CacheParams {
   days?: number;

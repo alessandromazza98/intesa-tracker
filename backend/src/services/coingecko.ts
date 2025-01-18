@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CryptoApiService, CryptoPrice, HistoricalPrice } from '../types/api';
+import { CryptoApiService, CryptoPrice, HistoricalPrice } from '../types/api.js';
 
 export class CoinGeckoService implements CryptoApiService {
   private readonly baseUrl = 'https://api.coingecko.com/api/v3';

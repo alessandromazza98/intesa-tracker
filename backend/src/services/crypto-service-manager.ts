@@ -1,4 +1,4 @@
-import { CryptoApiService, CryptoPrice, HistoricalPrice } from '../types/api';
+import { CryptoApiService, CryptoPrice, HistoricalPrice } from '../types/api.js';
 import winston from 'winston';
 
 const logger = winston.createLogger({
