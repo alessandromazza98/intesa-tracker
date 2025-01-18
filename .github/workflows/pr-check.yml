@@ -1,0 +1,179 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install Dependencies
+      run: |
+        npm run install:all
+        
+    - name: Build Frontend
+      run: cd frontend && npm run build
+      
+    - name: Build Backend
+      run: cd backend && npm run build
+      
+    - name: Check for sensitive data
+      run: |
+        if grep -r "API_KEY\|SECRET\|PASSWORD" .; then
+          echo "⚠️ Warning: Possible sensitive data found in the code"
+          exit 1
+        fi
+        
+    - name: Check package.json changes
+      run: |
+        git fetch origin main
+        echo "📦 Package changes in root:"
+        git diff origin/main...HEAD package.json || true
+        echo "📦 Package changes in frontend:"
+        git diff origin/main...HEAD frontend/package.json || true
+        echo "📦 Package changes in backend:"
+        git diff origin/main...HEAD backend/package.json || true
+        
+    - name: List all file changes
+      run: |
+        echo "📝 Changed files:"
+        git diff --name-status origin/main...HEAD
+
+    - name: Start Backend
+      run: |
+        cd backend
+        npm run dev &
+        echo "Waiting for backend to start..."
+        sleep 10
+        
+    - name: Start Frontend Dev Server
+      run: |
+        cd frontend
+        npm run dev &
+        echo "Waiting for frontend to start..."
+        sleep 10
+        
+    - name: Test Application
+      run: |
+        # Test backend health endpoint
+        BACKEND_HEALTH=$(curl -s http://localhost:3456/health)
+        if [[ $BACKEND_HEALTH != *"ok"* ]]; then
+          echo "❌ Backend health check failed"
+          exit 1
+        fi
+        echo "✅ Backend is healthy"
+        
+        # Test frontend is running
+        FRONTEND_RESPONSE=$(curl -s http://localhost:5173)
+        if [[ $FRONTEND_RESPONSE != *"<!DOCTYPE html>"* ]]; then
+          echo "❌ Frontend check failed"
+          exit 1
+        fi
+        echo "✅ Frontend is running"
+        
+        # Test Bitcoin price endpoint
+        PRICE_CHECK=$(curl -s http://localhost:3456/api/price/bitcoin)
+        if [[ $PRICE_CHECK != *"success"* ]]; then
+          echo "❌ Bitcoin price endpoint failed"
+          exit 1
+        fi
+        echo "✅ Bitcoin price endpoint is working"
+        
+    - name: Create Render Preview
+      env:
+        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      run: |
+        # Create a unique name for this PR preview
+        PR_NAME="pr-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}-${{ github.event.number }}"
+        
+        # Deploy backend service
+        BACKEND_ID=$(curl -X POST https://api.render.com/v1/services \
+          -H "Authorization: Bearer $RENDER_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "name": "'$PR_NAME'-backend",
+            "type": "web_service",
+            "runtime": "node",
+            "buildCommand": "cd backend && npm install && npm run build",
+            "startCommand": "cd backend && npm run start",
+            "envVars": [
+              {"key": "PORT", "value": "3456"}
+            ],
+            "autoDeploy": "no"
+          }' | jq -r '.id')
+        
+        # Get backend URL
+        BACKEND_URL=$(curl -H "Authorization: Bearer $RENDER_API_KEY" \
+          https://api.render.com/v1/services/$BACKEND_ID | jq -r '.url')
+        
+        # Deploy frontend service
+        FRONTEND_ID=$(curl -X POST https://api.render.com/v1/services \
+          -H "Authorization: Bearer $RENDER_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "name": "'$PR_NAME'-frontend",
+            "type": "static_site",
+            "buildCommand": "cd frontend && npm install && npm run build",
+            "publishPath": "frontend/dist",
+            "envVars": [
+              {"key": "VITE_BACKEND_URL", "value": "'$BACKEND_URL'"}
+            ],
+            "autoDeploy": "no"
+          }' | jq -r '.id')
+        
+        # Get frontend URL
+        FRONTEND_URL=$(curl -H "Authorization: Bearer $RENDER_API_KEY" \
+          https://api.render.com/v1/services/$FRONTEND_ID | jq -r '.url')
+        
+        # Save URLs for the PR comment
+        echo "FRONTEND_URL=$FRONTEND_URL" >> $GITHUB_ENV
+        echo "BACKEND_URL=$BACKEND_URL" >> $GITHUB_ENV
+        
+    - name: Comment PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const pkgDiff = require('child_process')
+            .execSync('git diff origin/main...HEAD "**/package.json"')
+            .toString();
+            
+          const files = require('child_process')
+            .execSync('git diff --name-status origin/main...HEAD')
+            .toString();
+            
+          let comment = '## PR Build Status\n\n';
+          comment += '✅ Build completed successfully\n\n';
+          
+          if (pkgDiff) {
+            comment += '### Package Changes\n\n```diff\n' + pkgDiff + '\n```\n\n';
+          }
+          
+          comment += '### Changed Files\n\n```\n' + files + '\n```\n\n';
+          comment += '### Application Tests\n\n';
+          comment += '✅ Backend started successfully\n';
+          comment += '✅ Frontend started successfully\n';
+          comment += '✅ Health checks passed\n\n';
+          
+          comment += '### Preview Deployment\n\n';
+          comment += `🌐 Frontend Preview: ${process.env.FRONTEND_URL}\n`;
+          comment += `🔗 Backend API: ${process.env.BACKEND_URL}\n\n`;
+          comment += '⏳ Preview environment is being deployed and will be ready in a few minutes.\n\n';
+          
+          comment += '⚠️ Please review these changes carefully before merging!';
+          
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: comment
+          }); 
