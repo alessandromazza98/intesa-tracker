@@ -19,6 +19,11 @@ Pull requests are the best way to propose changes to the codebase. I actively we
 5. Make sure your code lints.
 6. Issue that pull request!
 
+Make sure that your PR works locally by running the following commands:
+
+- `npm run install:all`
+- `npm run dev`
+
 ## Any contributions you make will be under the MIT Software License
 
 In short, when you submit code changes, your submissions are understood to be under the same [MIT License](http://choosealicense.com/licenses/mit/) that covers the project.
