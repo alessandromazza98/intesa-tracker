@@ -56,14 +56,14 @@ jobs:
         cd backend
         npm run dev &
         echo "Waiting for backend to start..."
-        sleep 10
+        sleep 2
         
     - name: Start Frontend Dev Server
       run: |
         cd frontend
         npm run dev &
         echo "Waiting for frontend to start..."
-        sleep 10
+        sleep 2
         
     - name: Test Application
       run: |
@@ -128,6 +128,18 @@ jobs:
               {"key": "PORT", "value": "3456"}
             ],
             "ownerId": "'$OWNER_ID'",
+            "serviceDetails": {
+              "plan": "free",
+              "pullRequestPreviewsEnabled": true,
+              "region": "oregon",
+              "env": "node",
+              "rootDir": ".",
+              "numInstances": 1,
+              "healthCheckPath": "/health",
+              "buildFilter": {
+                "paths": ["backend/**"]
+              }
+            },
             "autoDeploy": "no"
           }')
         
@@ -179,6 +191,14 @@ jobs:
               {"key": "VITE_BACKEND_URL", "value": "'$BACKEND_URL'"}
             ],
             "ownerId": "'$OWNER_ID'",
+            "serviceDetails": {
+              "plan": "free",
+              "pullRequestPreviewsEnabled": true,
+              "region": "oregon",
+              "buildFilter": {
+                "paths": ["frontend/**"]
+              }
+            },
             "autoDeploy": "no"
           }')
         
