@@ -97,9 +97,11 @@ jobs:
       run: |
         # Create a unique name for this PR preview
         PR_NAME="pr-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}-${{ github.event.number }}"
+        echo "Creating preview for $PR_NAME"
         
         # Deploy backend service
-        BACKEND_ID=$(curl -X POST https://api.render.com/v1/services \
+        echo "Creating backend service..."
+        BACKEND_RESPONSE=$(curl -X POST https://api.render.com/v1/services \
           -H "Authorization: Bearer $RENDER_API_KEY" \
           -H "Content-Type: application/json" \
           -d '{
@@ -112,14 +114,45 @@ jobs:
               {"key": "PORT", "value": "3456"}
             ],
             "autoDeploy": "no"
-          }' | jq -r '.id')
+          }')
+        
+        echo "Backend service creation response:"
+        echo "$BACKEND_RESPONSE"
+        
+        BACKEND_ID=$(echo "$BACKEND_RESPONSE" | jq -r '.service.id // empty')
+        if [ -z "$BACKEND_ID" ]; then
+          echo "❌ Failed to create backend service"
+          exit 1
+        fi
+        
+        echo "Waiting for backend service to be ready..."
+        for i in {1..30}; do
+          BACKEND_STATUS=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
+            "https://api.render.com/v1/services/$BACKEND_ID" | jq -r '.service.status // empty')
+          
+          if [ "$BACKEND_STATUS" = "live" ]; then
+            break
+          fi
+          echo "Backend status: $BACKEND_STATUS"
+          sleep 10
+        done
         
         # Get backend URL
-        BACKEND_URL=$(curl -H "Authorization: Bearer $RENDER_API_KEY" \
-          https://api.render.com/v1/services/$BACKEND_ID | jq -r '.url')
+        BACKEND_INFO=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
+          "https://api.render.com/v1/services/$BACKEND_ID")
+        BACKEND_URL=$(echo "$BACKEND_INFO" | jq -r '.service.url // empty')
+        
+        if [ -z "$BACKEND_URL" ]; then
+          echo "❌ Failed to get backend URL"
+          echo "Backend info: $BACKEND_INFO"
+          exit 1
+        fi
+        
+        echo "Backend URL: $BACKEND_URL"
         
         # Deploy frontend service
-        FRONTEND_ID=$(curl -X POST https://api.render.com/v1/services \
+        echo "Creating frontend service..."
+        FRONTEND_RESPONSE=$(curl -X POST https://api.render.com/v1/services \
           -H "Authorization: Bearer $RENDER_API_KEY" \
           -H "Content-Type: application/json" \
           -d '{
@@ -131,11 +164,41 @@ jobs:
               {"key": "VITE_BACKEND_URL", "value": "'$BACKEND_URL'"}
             ],
             "autoDeploy": "no"
-          }' | jq -r '.id')
+          }')
+        
+        echo "Frontend service creation response:"
+        echo "$FRONTEND_RESPONSE"
+        
+        FRONTEND_ID=$(echo "$FRONTEND_RESPONSE" | jq -r '.service.id // empty')
+        if [ -z "$FRONTEND_ID" ]; then
+          echo "❌ Failed to create frontend service"
+          exit 1
+        fi
+        
+        echo "Waiting for frontend service to be ready..."
+        for i in {1..30}; do
+          FRONTEND_STATUS=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
+            "https://api.render.com/v1/services/$FRONTEND_ID" | jq -r '.service.status // empty')
+          
+          if [ "$FRONTEND_STATUS" = "live" ]; then
+            break
+          fi
+          echo "Frontend status: $FRONTEND_STATUS"
+          sleep 10
+        done
         
         # Get frontend URL
-        FRONTEND_URL=$(curl -H "Authorization: Bearer $RENDER_API_KEY" \
-          https://api.render.com/v1/services/$FRONTEND_ID | jq -r '.url')
+        FRONTEND_INFO=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
+          "https://api.render.com/v1/services/$FRONTEND_ID")
+        FRONTEND_URL=$(echo "$FRONTEND_INFO" | jq -r '.service.url // empty')
+        
+        if [ -z "$FRONTEND_URL" ]; then
+          echo "❌ Failed to get frontend URL"
+          echo "Frontend info: $FRONTEND_INFO"
+          exit 1
+        fi
+        
+        echo "Frontend URL: $FRONTEND_URL"
         
         # Save URLs for the PR comment
         echo "FRONTEND_URL=$FRONTEND_URL" >> $GITHUB_ENV
