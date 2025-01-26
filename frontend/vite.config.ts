@@ -15,10 +15,10 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/api': {
-          target: `http://localhost:${PORT}`,
+          target: `http://${env.VITE_BACKEND_URL || 'localhost'}:${PORT}`,
           changeOrigin: true,
         },
-      },
+      },      
     },
   };
 });

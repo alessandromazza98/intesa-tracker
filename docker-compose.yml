@@ -1,0 +1,22 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    ports:
+      - "3456:3456"
+    environment:
+      - NODE_ENV=development
+      - PORT=3456
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    environment:
+      - NODE_ENV=development
+      - VITE_BACKEND_URL=backend
+      - PORT=3456
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
