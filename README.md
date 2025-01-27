@@ -18,6 +18,38 @@ A web application to track Bitcoin investment for Banca Intesa.
 - Multiple API sources with fallback
 - Caching layer to handle rate limits
 
+## Running with Docker Compose
+
+To run the application using Docker Compose, follow these steps:
+
+1. **Build and start the containers**:
+   
+   In the root of the project, run:
+
+   ```bash
+    docker compose up -d
+   ```
+   This will build the frontend and backend containers and start them.
+
+2. **Endpoint**:
+
+   The URLs for the frontend and backend are detailed in the [Development Setup](#development-setup) section.
+
+3. **Stop the application**:
+
+   To stop the containers run:
+
+   ```
+   docker compose stop
+   ```
+   
+   If you want to stop and remove the containers and network run:
+
+   ```
+   docker compose down
+   ```
+
+
 ## Development Setup
 
 1. Install dependencies for all projects:
