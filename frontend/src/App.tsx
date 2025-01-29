@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Header } from './components/Header';
 import { Chart } from './components/Chart';
@@ -31,73 +31,73 @@ function App() {
     pnlPercentageEUR: 0,
   });
 
-  useEffect(() => {
-    const fetchPriceData = async () => {
-      try {
-        // Fetch current price and historical data from our backend
-        const [currentResponse, historicalResponse] = await Promise.all([
-          axios.get(`${BACKEND_URL}/api/price/bitcoin`),
-          axios.get(`${BACKEND_URL}/api/historical/bitcoin?days=60`),
-        ]);
+  const fetchPriceData = useCallback(async () => {
+    try {
+      // Fetch current price and historical data from our backend
+      const [currentResponse, historicalResponse] = await Promise.all([
+        axios.get(`${BACKEND_URL}/api/price/bitcoin`),
+        axios.get(`${BACKEND_URL}/api/historical/bitcoin?days=60`),
+      ]);
 
-        if (!currentResponse.data.success || !historicalResponse.data.success) {
-          throw new Error('Failed to fetch data from backend');
-        }
-
-        const currentPrice: BitcoinPrice = {
-          usd: currentResponse.data.data.price,
-          eur: currentResponse.data.data.priceEUR,
-          timestamp: currentResponse.data.data.timestamp,
-        };
-
-        // Calculate current holdings value and PNL
-        const currentValueUSD = holdings.totalBitcoin * currentPrice.usd;
-        const currentValueEUR = holdings.totalBitcoin * currentPrice.eur;
-
-        const totalInvestedUSD = mockTransactions.reduce((sum, t) => sum + t.totalUSD, 0);
-        const totalInvestedEUR = mockTransactions.reduce((sum, t) => sum + t.totalEUR, 0);
-
-        const pnlUSD = currentValueUSD - totalInvestedUSD;
-        const pnlEUR = currentValueEUR - totalInvestedEUR;
-        const pnlPercentageUSD = (pnlUSD / totalInvestedUSD) * 100;
-        const pnlPercentageEUR = (pnlEUR / totalInvestedEUR) * 100;
-
-        setHoldings({
-          ...holdings,
-          valueUSD: currentValueUSD,
-          valueEUR: currentValueEUR,
-          pnlUSD,
-          pnlEUR,
-          pnlPercentageUSD,
-          pnlPercentageEUR,
-        });
-
-        // Process historical data - now using both USD and EUR prices
-        const historicalData: BitcoinPrice[] = historicalResponse.data.data.prices.map(
-          (usdPrice: [number, number], index: number) => {
-            const eurPrice = historicalResponse.data.data.pricesEUR[index];
-            return {
-              timestamp: usdPrice[0],
-              usd: usdPrice[1],
-              eur: eurPrice[1],
-            };
-          }
-        );
-
-        // Add current price to the end of historical data
-        historicalData.push(currentPrice);
-
-        setPriceData(historicalData);
-      } catch (error) {
-        console.error('Error fetching price data:', error);
+      if (!currentResponse.data.success || !historicalResponse.data.success) {
+        throw new Error('Failed to fetch data from backend');
       }
-    };
 
+      const currentPrice: BitcoinPrice = {
+        usd: currentResponse.data.data.price,
+        eur: currentResponse.data.data.priceEUR,
+        timestamp: currentResponse.data.data.timestamp,
+      };
+
+      // Calculate current holdings value and PNL
+      const currentValueUSD = holdings.totalBitcoin * currentPrice.usd;
+      const currentValueEUR = holdings.totalBitcoin * currentPrice.eur;
+
+      const totalInvestedUSD = mockTransactions.reduce((sum, t) => sum + t.totalUSD, 0);
+      const totalInvestedEUR = mockTransactions.reduce((sum, t) => sum + t.totalEUR, 0);
+
+      const pnlUSD = currentValueUSD - totalInvestedUSD;
+      const pnlEUR = currentValueEUR - totalInvestedEUR;
+      const pnlPercentageUSD = (pnlUSD / totalInvestedUSD) * 100;
+      const pnlPercentageEUR = (pnlEUR / totalInvestedEUR) * 100;
+
+      setHoldings((prevHoldings) => ({
+        ...prevHoldings,
+        valueUSD: currentValueUSD,
+        valueEUR: currentValueEUR,
+        pnlUSD,
+        pnlEUR,
+        pnlPercentageUSD,
+        pnlPercentageEUR,
+      }));
+
+      // Process historical data - now using both USD and EUR prices
+      const historicalData: BitcoinPrice[] = historicalResponse.data.data.prices.map(
+        (usdPrice: [number, number], index: number) => {
+          const eurPrice = historicalResponse.data.data.pricesEUR[index];
+          return {
+            timestamp: usdPrice[0],
+            usd: usdPrice[1],
+            eur: eurPrice[1],
+          };
+        }
+      );
+
+      // Add current price to the end of historical data
+      historicalData.push(currentPrice);
+
+      setPriceData(historicalData);
+    } catch (error) {
+      console.error('Error fetching price data:', error);
+    }
+  }, [holdings.totalBitcoin]);
+
+  useEffect(() => {
     fetchPriceData(); // Initial fetch
     const interval = setInterval(fetchPriceData, 15 * 60 * 1000); // Fetch every 15 minutes
 
     return () => clearInterval(interval);
-  }, [holdings]);
+  }, [fetchPriceData]);
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col">
